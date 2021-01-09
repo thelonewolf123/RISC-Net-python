@@ -217,6 +217,7 @@ class RISC_Net(object):
                 self.set_register_value(op1, op2)
             elif mode == 3:
                 self.set_register_value(op1, op2)
+
             self.r0 += 2
 
         elif opcode == 1:
@@ -270,11 +271,11 @@ class RISC_Net(object):
 
         elif opcode == 8:
             """
-            Comp dest op1 op2
+            Comp mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
             self.r0 += 2
-            
+
         elif opcode == 9:
             """
             Jump mem_addr
@@ -328,6 +329,7 @@ class RISC_Net(object):
             """
             self.r1 = op1 // op2
             self.r2 = op1 % op2
+
         elif opcode == 5:
             """
             And mode op1 op2
