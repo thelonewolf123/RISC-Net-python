@@ -1,0 +1,72 @@
+# RISC-Net
+
+## Blocks
+- Rigisters
+- ALU
+- Control Unit
+- Memory
+ 
+## Instructions
+- Mov  mode src dest
+
+- Add  mode op1 op2
+- Sub  mode op1 op2
+- Mul  mode op1 op2
+- Div  mode op1 op2
+
+- And  mode op1 op2
+- Or   mode op1 op2
+- Not  mode op1 nul
+
+- Comp mode op1  op2
+
+- Jump   mem_addr nul nul
+- JumpEq mem_addr nul nul
+- JumpLT mem_addr nul nul
+
+- Hlt nul nul nul
+
+## Modes
+- 0000 => op1->reg, op2->reg
+- 0001 => op1->reg, op2->mem_addr
+- 0010 => op1->mem_addr, op2->reg
+- 0011 => op1->value, op2->reg
+
+## Instructions width
+
+### Mode 00
+- Mov mode reg reg nul\*4 -> 4 2 4 4 0\*18
+- Add mode reg reg nul\*4 -> 4 2 4 4 0\*18
+
+### Mode 01
+- Mov mode reg mem_addr nul\*4 -> 4 2 4 16 0\*6
+- Add mode reg mem_addr nul\*4 -> 4 2 4 16 0\*6 
+
+### Mode 10
+- Mov mode mem_addr reg nul\*4 -> 4 2 16 4 0\*6
+- Add mode mem_addr reg nul\*4 -> 4 2 16 4 0\*6 
+
+### Mode 11
+- Mov mode value reg nul\*4 -> 4 2 16 4 0\*6
+- Add mode value reg nul\*4 -> 4 2 16 4 0\*6 
+
+## Registers
+
+- R0 => program counter
+- R1 => Primary accumulator
+- R2 => Secondary accumulator
+- R3 => General purpose
+- R4 => General purpose
+- R5 => General purpose
+- R6 => General purpose
+- R7 => I/O Port A
+- R8 => I/O Port B 
+
+- RFlag => flag register (3 bits)
+
+## Flag register Map
+
+- Width => 16
+- 0 => Zero Flag
+- 1 => Less Than Flag
+- 2 => Carry Flag
