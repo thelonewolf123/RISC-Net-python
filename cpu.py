@@ -1,5 +1,6 @@
 import os
-
+import json
+import time
 
 class RISC_Net(object):
     """
@@ -7,8 +8,9 @@ class RISC_Net(object):
     """
 
     def __init__(self, memory, clk, pc_offset=0):
+        self.clk = clk
 
-        self.r0 = pc_offset  # program counter
+        self.r0 = pc_offset # program counter
         self.r1 = 0         # primary accumulator
         self.r2 = 0         # secondary accumulator
         self.r3 = 0         # general purpose
@@ -19,7 +21,8 @@ class RISC_Net(object):
         self.r8 = 0         # i/o port b
 
         self.rflag = []     # flag register
-        self.instruction_reg = 0
+        self.instruction_reg = [] # store current instruction
+        self.is_hlt = False
 
         self.memory_dump = memory
         self.data_line = 0
@@ -30,7 +33,28 @@ class RISC_Net(object):
     def run(self):
 
         while True:
-            pass
+            for offset in range(0,2):
+
+                self.address_line = self.r0+offset
+                self.rw = 1
+                self.memory()
+
+                instruction = self.data_line
+
+                self.instruction_reg = self.decimal_to_binary(instruction)
+
+                time.sleep(1.0/self.clk)
+
+                if offset == 1:
+                    self.instruction_reg += self.decimal_to_binary(instruction)
+
+            opcode,mode,op1,op2 = self.decoder()
+            self.control_unit(opcode,mode,op1,op2)
+
+            if self.is_hlt:
+                with open('memory/memory.data', 'wb') as fileobj:
+                    fileobj.write(bytes(json.dumps(self.memory_dump).encode('utf-8')))
+                break
 
     def binary_to_decimal(self, bits):
         decimal_sum = 0
@@ -40,9 +64,9 @@ class RISC_Net(object):
 
     def decimal_to_binary(self, decimal):
         bits = []
-        data = [x for x in bin(56)][2:]
+        data = [x for x in bin(decimal)][2:]
         bits = [int(x) for x in data]
-        bits = [0, ]*(8-len(bits)) + bits
+        bits = bits + [0, ]*(16-len(bits))
 
         return bits
 
@@ -88,54 +112,55 @@ class RISC_Net(object):
         elif reg == 8:
             self.r8 = value
 
-    def decoder(self, instruction):
-        opcode = self.binary_to_decimal(instruction[0:4])
-        op1 = None
-        op2 = None
+    def decoder(self):
+        opcode = self.binary_to_decimal(self.instruction_reg[0:4])
+        mode   = None
+        op1    = None
+        op2    = None
 
         if opcode == 0:
-            mode = self.binary_to_decimal(instruction[4:6])
+            mode = self.binary_to_decimal(self.instruction_reg[4:6])
 
             if mode == 0:
-                reg1 = self.binary_to_decimal(instruction[6:10])
+                reg1 = self.binary_to_decimal(self.instruction_reg[6:10])
 
                 op1 = self.get_register_value(reg1)
-                op2 = self.binary_to_decimal(instruction[10:14])
+                op2 = self.binary_to_decimal(self.instruction_reg[10:14])
 
             elif mode == 1:
-                reg1 = self.binary_to_decimal(instruction[6:10])
+                reg1 = self.binary_to_decimal(self.instruction_reg[6:10])
 
                 # read value from register
                 op1 = self.get_register_value(reg1)
-                op2 = self.binary_to_decimal(instruction[10:26])
+                op2 = self.binary_to_decimal(self.instruction_reg[10:26])
 
             elif mode == 2:
-                mem1 = self.binary_to_decimal(instruction[6:22])
+                mem1 = self.binary_to_decimal(self.instruction_reg[6:22])
 
                 # read value from RAM
                 self.rw = 1
                 self.address_line = mem1
                 self.memory()
                 op1 = self.data_line
-                op2 = self.binary_to_decimal(instruction[10:14])
+                op2 = self.binary_to_decimal(self.instruction_reg[10:14])
 
             elif mode == 3:
 
-                op1 = self.binary_to_decimal(instruction[6:22])
-                op2 = self.binary_to_decimal(instruction[22:26])
+                op1 = self.binary_to_decimal(self.instruction_reg[6:22])
+                op2 = self.binary_to_decimal(self.instruction_reg[22:26])
 
         if opcode > 0 and opcode < 9:
-            mode = self.binary_to_decimal(instruction[4:6])
+            mode = self.binary_to_decimal(self.instruction_reg[4:6])
 
             if mode == 0:
-                reg1 = self.binary_to_decimal(instruction[6:10])
-                reg2 = self.binary_to_decimal(instruction[10:14])
+                reg1 = self.binary_to_decimal(self.instruction_reg[6:10])
+                reg2 = self.binary_to_decimal(self.instruction_reg[10:14])
                 op1 = self.get_register_value(reg1)
                 op2 = self.get_register_value(reg2)
 
             elif mode == 1:
-                reg1 = self.binary_to_decimal(instruction[6:10])
-                mem1 = self.binary_to_decimal(instruction[10:26])
+                reg1 = self.binary_to_decimal(self.instruction_reg[6:10])
+                mem1 = self.binary_to_decimal(self.instruction_reg[10:26])
 
                 # read value from register
                 op1 = self.get_register_value(reg1)
@@ -147,8 +172,8 @@ class RISC_Net(object):
                 op2 = self.data_line
 
             elif mode == 2:
-                mem1 = self.binary_to_decimal(instruction[6:22])
-                reg1 = self.binary_to_decimal(instruction[22:26])
+                mem1 = self.binary_to_decimal(self.instruction_reg[6:22])
+                reg1 = self.binary_to_decimal(self.instruction_reg[22:26])
 
                 # read value from RAM
                 self.rw = 1
@@ -160,9 +185,9 @@ class RISC_Net(object):
                 op2 = self.get_register_value(reg1)
 
             elif mode == 3:
-                reg1 = self.binary_to_decimal(instruction[22:26])
+                reg1 = self.binary_to_decimal(self.instruction_reg[22:26])
 
-                op1 = self.binary_to_decimal(instruction[6:22])
+                op1 = self.binary_to_decimal(self.instruction_reg[6:22])
                 op2 = self.get_register_value(reg1)
 
         return opcode, mode, op1, op2
@@ -183,7 +208,7 @@ class RISC_Net(object):
                 self.set_register_value(op1, op2)
 
             elif mode == 1:
-                self.rw = 1
+                self.rw = 0
                 self.data_line = op1
                 self.address_line = op2
                 self.memory()
@@ -192,47 +217,64 @@ class RISC_Net(object):
                 self.set_register_value(op1, op2)
             elif mode == 3:
                 self.set_register_value(op1, op2)
+            self.r0 += 2
 
         elif opcode == 1:
             """
             Add mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+
         elif opcode == 2:
             """
             Sub mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+
         elif opcode == 3:
             """
             Mul mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+
         elif opcode == 4:
             """
             Div mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+
         elif opcode == 5:
             """
             And mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+
         elif opcode == 6:
             """
             Or mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+
         elif opcode == 7:
             """
             Not mode op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+
         elif opcode == 8:
             """
             Comp dest op1 op2
             """
             self.arithmetic_logic_unit(opcode, op1, op2)
+            self.r0 += 2
+            
         elif opcode == 9:
             """
             Jump mem_addr
@@ -256,7 +298,7 @@ class RISC_Net(object):
             """
             Hlt
             """
-            pass
+            self.is_hlt = True
 
     def arithmetic_logic_unit(self, opcode, op1, op2):
         if opcode == 1:

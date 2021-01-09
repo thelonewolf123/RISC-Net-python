@@ -1,5 +1,8 @@
-import os
+import json
 
-with open('memory.data','wb') as fileobj:
-    for _ in range(0,25000):
-        fileobj.write(b'0000')
+# width = 16 bits
+
+data = [0,]*1000
+
+with open('memory.data', 'wb') as fileobj:
+    fileobj.write(bytes(json.dumps(data).encode('utf-8')))
