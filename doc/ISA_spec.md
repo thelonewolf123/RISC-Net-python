@@ -16,15 +16,15 @@
 
 - And  mode op1 op2
 - Or   mode op1 op2
-- Not  mode op1 nul
+- Not  mode op1 
 
 - Comp mode op1  op2
 
-- Jump   mem_addr nul nul
-- JumpEq mem_addr nul nul
-- JumpLT mem_addr nul nul
+- Jump   mem_addr  
+- JumpEq mem_addr  
+- JumpLT mem_addr  
 
-- Hlt nul nul nul
+- Hlt   
 
 ## Modes
 - 0000 => op1->reg, op2->reg
@@ -70,3 +70,39 @@
 - 0 => Zero Flag
 - 1 => Less Than Flag
 - 2 => Carry Flag
+
+## Assembly guide
+
+#### Mov 
+    1. Used to copy data from ram to register, register to register, register to ram and copy values directly to register
+
+##### Addressing Modes
+    - direct addressing mode
+        mov r3, $100
+
+        r3   - gp register
+        $100 - address on RAM
+    
+    - register addressing mode
+    
+        mov r5, r4
+      
+        r5,r4 - gp registers
+    
+    - imediate addressing mode
+        
+        mov #17,r4
+
+        17 - decimal value
+        r4 - gp register
+
+### Control flow instructions
+
+#### Jmp
+    1. Unconditional jump, used to change the program conter value to whatever value we want.
+
+    ##### Addressing Modes
+        - direct addressing mode
+            jmp $100
+
+            $100 - address on RAM

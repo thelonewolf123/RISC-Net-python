@@ -1,15 +1,21 @@
+import sys
 import json
 
 from cpu import RISC_Net
 
-memory = []
+def main():
+    memory = []
 
-with open('memory/memory.data', 'r') as fileobj:
-    memory = json.loads(fileobj.readlines()[0])
+    with open(sys.argv[1], 'r') as fileobj:
+        memory = json.loads(fileobj.readlines()[0])
 
-print(memory)
+    # print(memory)
 
-add_numbers = [[0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]] + [[0, ]*16]*100
+    cpu1= RISC_Net(memory, 4)
+    cpu1.run()
 
-cpu1= RISC_Net(add_numbers, 4)
-cpu1.run()
+if __name__ == "__main__":
+    if len(sys.argv) == 2:
+        main()
+    else:
+        print(f"Usage: {sys.argv[0]} <path to program file>")

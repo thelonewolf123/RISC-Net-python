@@ -29,6 +29,13 @@ class Assembler(object):
             object_code.append(hex_result[16:])
         print(object_code)
 
+        # memory size -> 16KB => 16384 bytes
+
+        object_code = object_code + [[0,]*16]*(16384-len(object_code))
+
+        with open(self.output_file, 'wb') as fileobj:
+            fileobj.write(bytes(json.dumps(object_code).encode('utf-8')))
+
     def read_file(self):
         data = []
 
@@ -133,5 +140,8 @@ class Assembler(object):
 
 
 if __name__ == "__main__":
-    asm = Assembler(
-        "/home/lonewolf/projects/hobby/RISC-Net-python/tool-chain/src/add.asm", "output.mem")
+    if len(sys.argv) == 3:
+        print("Starting assembling ...,")
+        asm = Assembler(sys.argv[1], sys.argv[2])
+    else:
+        print(f"Usage: {sys.argv[0]} <path to input file> <path to output file>")

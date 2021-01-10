@@ -20,7 +20,7 @@ class RISC_Net(object):
         self.r7 = 0         # i/o port a
         self.r8 = 0         # i/o port b
 
-        self.rflag = []     # flag register
+        self.rflag = [0, 0, 0]     # flag register
         self.instruction_reg = []  # store current instruction
         self.is_hlt = False
 
@@ -39,11 +39,10 @@ class RISC_Net(object):
                 self.rw = 1
                 self.memory()
 
-                instruction = self.data_line
                 if offset == 0:
-                    self.instruction_reg = instruction
-                if offset == 1:
-                    self.instruction_reg += instruction
+                    self.instruction_reg = self.data_line
+                else:
+                    self.instruction_reg += self.data_line
 
                 time.sleep(1.0/self.clk)
 
@@ -52,7 +51,7 @@ class RISC_Net(object):
 
             register_map = {"R0": self.r0, "R1": self.r1, "R2": self.r2, "R3": self.r3, "R4": self.r4, "R5": self.r5,
                             "R6": self.r6, "R7": self.r7, "R8": self.r8, "Rflag": self.rflag, "instruction_reg": self.instruction_reg, }
-            print(register_map)
+            # print(register_map)
 
             if self.is_hlt:
                 with open('memory/memory.data', 'wb') as fileobj:
@@ -62,6 +61,9 @@ class RISC_Net(object):
                 with open('memory/registers.data', 'wb') as regfile:
                     regfile.write(
                         bytes(json.dumps(register_map).encode('utf-8')))
+
+                print(register_map)
+
                 break
 
     def binary_to_decimal(self, bits):
@@ -70,13 +72,13 @@ class RISC_Net(object):
             decimal_sum += i*(2**j)
         return decimal_sum
 
-    # def decimal_to_binary(self, decimal, pad=16):
-    #     bits = []
-    #     data = [x for x in bin(decimal)][2:]
-    #     bits = [int(x) for x in data]
-    #     bits = [0, ]*(pad-len(bits)) + bits
+    def decimal_to_binary(self, decimal, pad=16):
+        bits = []
+        data = [x for x in bin(decimal)][2:]
+        bits = [int(x) for x in data]
+        bits = [0, ]*(pad-len(bits)) + bits
 
-    #     return bits
+        return bits
 
     def get_register_value(self, reg):
 
@@ -202,7 +204,8 @@ class RISC_Net(object):
 
     def memory(self):
         if self.rw == 0:
-            self.memory_dump[self.address_line] = self.data_line
+            self.memory_dump[self.address_line] = self.decimal_to_binary(
+                self.data_line, 16)
         elif self.rw == 1:
             self.data_line = self.memory_dump[self.address_line]
 
@@ -309,6 +312,11 @@ class RISC_Net(object):
             Add mode op1 op2
             """
             self.r1 = op1 + op2
+
+            if len(hex(self.r1)[2:]) == 5:
+                self.rflag[2] = 1
+            else:
+                self.rflag[2] = 0
 
         elif opcode == 2:
             """
