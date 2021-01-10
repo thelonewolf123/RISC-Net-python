@@ -1,4 +1,3 @@
-import os
 import json
 import time
 
@@ -11,7 +10,7 @@ class RISC_Net(object):
     def __init__(self, memory, clk, pc_offset=0):
         self.clk = clk
 
-        self.r0 = pc_offset # program counter
+        self.r0 = pc_offset  # program counter
         self.r1 = 0         # primary accumulator
         self.r2 = 0         # secondary accumulator
         self.r3 = 0         # general purpose
@@ -26,7 +25,7 @@ class RISC_Net(object):
         self.is_hlt = False
 
         self.memory_dump = memory
-        self.data_line = 0
+        self.data_line = []
         self.address_line = 0
 
         self.rw = 0
@@ -41,19 +40,18 @@ class RISC_Net(object):
                 self.memory()
 
                 instruction = self.data_line
-
-                self.instruction_reg = self.decimal_to_binary(instruction)
+                if offset == 0:
+                    self.instruction_reg = instruction
+                if offset == 1:
+                    self.instruction_reg += instruction
 
                 time.sleep(1.0/self.clk)
-
-                if offset == 1:
-                    self.instruction_reg += self.decimal_to_binary(instruction)
 
             opcode, mode, op1, op2 = self.decoder()
             self.control_unit(opcode, mode, op1, op2)
 
             register_map = {"R0": self.r0, "R1": self.r1, "R2": self.r2, "R3": self.r3, "R4": self.r4, "R5": self.r5,
-                                "R6": self.r6, "R7": self.r7, "R8": self.r8, "Rflag": self.rflag, "instruction_reg": self.instruction_reg, }
+                            "R6": self.r6, "R7": self.r7, "R8": self.r8, "Rflag": self.rflag, "instruction_reg": self.instruction_reg, }
             print(register_map)
 
             if self.is_hlt:
@@ -72,13 +70,13 @@ class RISC_Net(object):
             decimal_sum += i*(2**j)
         return decimal_sum
 
-    def decimal_to_binary(self, decimal):
-        bits = []
-        data = [x for x in bin(decimal)][2:]
-        bits = [int(x) for x in data]
-        bits = bits + [0, ]*(16-len(bits))
+    # def decimal_to_binary(self, decimal, pad=16):
+    #     bits = []
+    #     data = [x for x in bin(decimal)][2:]
+    #     bits = [int(x) for x in data]
+    #     bits = [0, ]*(pad-len(bits)) + bits
 
-        return bits
+    #     return bits
 
     def get_register_value(self, reg):
 
@@ -214,19 +212,13 @@ class RISC_Net(object):
             """
             Mov src dest offset
             """
-            if mode == 0:
-                self.set_register_value(op1, op2)
-
-            elif mode == 1:
+            if mode == 1:
                 self.rw = 0
                 self.data_line = op1
                 self.address_line = op2
                 self.memory()
-
-            elif mode == 2:
-                self.set_register_value(op1, op2)
-            elif mode == 3:
-                self.set_register_value(op1, op2)
+            else:
+                self.set_register_value(op2, op1)
 
             self.r0 += 2
 
