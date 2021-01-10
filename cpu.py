@@ -2,6 +2,7 @@ import os
 import json
 import time
 
+
 class RISC_Net(object):
     """
     Simple 16 bit risc processor simulator
@@ -21,7 +22,7 @@ class RISC_Net(object):
         self.r8 = 0         # i/o port b
 
         self.rflag = []     # flag register
-        self.instruction_reg = [] # store current instruction
+        self.instruction_reg = []  # store current instruction
         self.is_hlt = False
 
         self.memory_dump = memory
@@ -33,7 +34,7 @@ class RISC_Net(object):
     def run(self):
 
         while True:
-            for offset in range(0,2):
+            for offset in range(0, 2):
 
                 self.address_line = self.r0+offset
                 self.rw = 1
@@ -48,12 +49,21 @@ class RISC_Net(object):
                 if offset == 1:
                     self.instruction_reg += self.decimal_to_binary(instruction)
 
-            opcode,mode,op1,op2 = self.decoder()
-            self.control_unit(opcode,mode,op1,op2)
+            opcode, mode, op1, op2 = self.decoder()
+            self.control_unit(opcode, mode, op1, op2)
+
+            register_map = {"R0": self.r0, "R1": self.r1, "R2": self.r2, "R3": self.r3, "R4": self.r4, "R5": self.r5,
+                                "R6": self.r6, "R7": self.r7, "R8": self.r8, "Rflag": self.rflag, "instruction_reg": self.instruction_reg, }
+            print(register_map)
 
             if self.is_hlt:
                 with open('memory/memory.data', 'wb') as fileobj:
-                    fileobj.write(bytes(json.dumps(self.memory_dump).encode('utf-8')))
+                    fileobj.write(
+                        bytes(json.dumps(self.memory_dump).encode('utf-8')))
+
+                with open('memory/registers.data', 'wb') as regfile:
+                    regfile.write(
+                        bytes(json.dumps(register_map).encode('utf-8')))
                 break
 
     def binary_to_decimal(self, bits):
@@ -114,9 +124,9 @@ class RISC_Net(object):
 
     def decoder(self):
         opcode = self.binary_to_decimal(self.instruction_reg[0:4])
-        mode   = None
-        op1    = None
-        op2    = None
+        mode = None
+        op1 = None
+        op2 = None
 
         if opcode == 0:
             mode = self.binary_to_decimal(self.instruction_reg[4:6])
