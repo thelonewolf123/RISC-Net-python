@@ -200,6 +200,9 @@ class RISC_Net(object):
                 op1 = self.binary_to_decimal(self.instruction_reg[6:22])
                 op2 = self.get_register_value(reg1)
 
+        if opcode >= 9:
+            op1 = self.binary_to_decimal(self.instruction_reg[4:20])
+
         return opcode, mode, op1, op2
 
     def memory(self):
