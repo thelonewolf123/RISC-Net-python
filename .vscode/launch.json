@@ -8,7 +8,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": ["memory/memory.data",],
+            "args": ["memory/memory.json",],
             "console": "integratedTerminal"
         }
     ]
