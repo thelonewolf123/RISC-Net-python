@@ -4,5 +4,5 @@ import json
 
 data = [[0,]*16]*16384
 
-with open('memory.data', 'wb') as fileobj:
-    fileobj.write(bytes(json.dumps(data).encode('utf-8')))
+with open('memory.json', 'w') as fileobj:
+    fileobj.write(json.dumps(data))

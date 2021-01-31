@@ -54,13 +54,11 @@ class RISC_Net(object):
             # print(register_map)
 
             if self.is_hlt:
-                with open('memory/memory.data', 'wb') as fileobj:
-                    fileobj.write(
-                        bytes(json.dumps(self.memory_dump).encode('utf-8')))
+                with open('memory/memory.json', 'w') as fileobj:
+                    fileobj.write(json.dumps(self.memory_dump))
 
-                with open('memory/registers.data', 'wb') as regfile:
-                    regfile.write(
-                        bytes(json.dumps(register_map).encode('utf-8')))
+                with open('memory/registers.json', 'w') as regfile:
+                    regfile.write(json.dumps(register_map))
 
                 print(register_map)
 
