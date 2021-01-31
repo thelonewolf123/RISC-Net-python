@@ -27,10 +27,10 @@
 - Hlt   
 
 ## Modes
-- 0000 => op1->reg, op2->reg
-- 0001 => op1->reg, op2->mem_addr
-- 0010 => op1->mem_addr, op2->reg
-- 0011 => op1->value, op2->reg
+- 00 => op1->reg, op2->reg
+- 01 => op1->reg, op2->mem_addr
+- 10 => op1->mem_addr, op2->reg
+- 11 => op1->value, op2->reg
 
 ## Instructions width
 

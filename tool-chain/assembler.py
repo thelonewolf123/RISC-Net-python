@@ -11,7 +11,7 @@ class Assembler(object):
         self.input_file = input_file
         self.output_file = output_file
         self.opcode_map = {"mov": 0, "add": 1, "sub": 2, "mul": 3, "div": 4, "and": 5,
-                           "or": 6, "not": 7, "cmp": 9, "jmp": 9, "je": 10, "jle": 11, "hlt": 12}
+                           "or": 6, "not": 7, "cmp": 8, "jmp": 9, "je": 10, "jle": 11, "hlt": 12}
 
         self.binary_opcodes = ["mov", "add", "sub",
                                "mul", "div", "and", "or", "cmp"]

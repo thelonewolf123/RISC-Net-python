@@ -35,7 +35,7 @@ class RISC_Net(object):
         while True:
             for offset in range(0, 2):
 
-                self.address_line = self.r0+offset
+                self.address_line = self.r0 + offset
                 self.rw = 1
                 self.memory()
 
