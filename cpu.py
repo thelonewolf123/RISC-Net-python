@@ -42,7 +42,7 @@ class RISC_Net(object):
                 if offset == 0:
                     self.instruction_reg = self.data_line
                 else:
-                    self.instruction_reg += self.data_line
+                    self.instruction_reg = (*self.instruction_reg, *self.data_line)
 
                 time.sleep(1.0/self.clk)
 
